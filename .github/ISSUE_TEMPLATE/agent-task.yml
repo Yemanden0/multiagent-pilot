@@ -1,0 +1,24 @@
+name: Agent task
+description: Маленькая задача с проверяемыми критериями
+body:
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Требования
+      description: Опишите ожидаемое поведение и ограничения.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Критерии приёмки
+      description: Приведите примеры входов и ожидаемых результатов, включая граничные случаи.
+    validations:
+      required: true
+  - type: textarea
+    id: questions
+    attributes:
+      label: Открытые вопросы
+      description: Укажите недостающие решения или напишите, что известных вопросов нет.
+    validations:
+      required: true

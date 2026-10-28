@@ -1,0 +1,10 @@
+{
+  "schema_version": "pilot-policy/v1",
+  "allowed_paths": ["src/", "tests/"],
+  "protected_paths": [".github/", "go.mod", "Makefile", "docs/"],
+  "checks": [
+    {"id": "build", "argv": ["make", "build"], "timeout_seconds": 120},
+    {"id": "lint", "argv": ["make", "lint"], "timeout_seconds": 120},
+    {"id": "test", "argv": ["make", "test"], "timeout_seconds": 120}
+  ]
+}
