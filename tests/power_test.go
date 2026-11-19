@@ -13,21 +13,26 @@ func TestPow(t *testing.T) {
 		name     string
 		base     int64
 		exponent int64
-		want     uint64
+		want     int64
 		wantErr  error
 	}{
 		{"positive exponent", 2, 10, 1024, nil},
 		{"zero base", 0, 5, 0, nil},
 		{"one base", 1, math.MaxInt64, 1, nil},
 		{"even negative base", -2, 4, 16, nil},
-		{"max int64 first power", math.MaxInt64, 1, uint64(math.MaxInt64), nil},
-		{"uint64 boundary", 2, 63, 1 << 63, nil},
+		{"odd negative base", -2, 3, -8, nil},
+		{"negative one odd exponent", -1, math.MaxInt64, -1, nil},
+		{"negative one even exponent", -1, math.MaxInt64 - 1, 1, nil},
+		{"max int64 first power", math.MaxInt64, 1, math.MaxInt64, nil},
+		{"min int64 first power", math.MinInt64, 1, math.MinInt64, nil},
+		{"min int64 from pow", -2, 63, math.MinInt64, nil},
+		{"int64 boundary positive overflow", 2, 63, 0, calculator.ErrOverflow},
 		{"negative exponent", 2, -1, 0, calculator.ErrInvalidExponent},
 		{"zero exponent", 2, 0, 0, calculator.ErrInvalidExponent},
-		{"uint64 overflow", 2, 64, 0, calculator.ErrOverflow},
-		{"odd negative base", -2, 3, 0, calculator.ErrOverflow},
+		{"int64 overflow", 2, 64, 0, calculator.ErrOverflow},
+		{"negative even exponent overflow", -2, 64, 0, calculator.ErrOverflow},
 		{"max int64 squared", math.MaxInt64, 2, 0, calculator.ErrOverflow},
-		{"min int64 first power", math.MinInt64, 1, 0, calculator.ErrOverflow},
+		{"min int64 squared", math.MinInt64, 2, 0, calculator.ErrOverflow},
 	}
 
 	for _, tc := range cases {
@@ -53,6 +58,13 @@ func TestPowerAlias(t *testing.T) {
 	got, err := calculator.Power(3, 4)
 	if err != nil || got != 81 {
 		t.Fatalf("Power(3, 4) = %d, %v; want 81, nil", got, err)
+	}
+}
+
+func TestPowerNegativeAlias(t *testing.T) {
+	got, err := calculator.Power(-3, 3)
+	if err != nil || got != -27 {
+		t.Fatalf("Power(-3, 3) = %d, %v; want -27, nil", got, err)
 	}
 }
 
