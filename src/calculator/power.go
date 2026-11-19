@@ -2,6 +2,7 @@ package calculator
 
 import (
 	"errors"
+	"math"
 	"math/bits"
 )
 
@@ -12,14 +13,13 @@ var ErrInvalidExponent = errors.New("exponent must be positive")
 // specifically handle negative exponents.
 var ErrNegativeExponent = ErrInvalidExponent
 
-// Pow returns base raised to exponent. The exponent must be positive.
+// Pow returns base raised to exponent, or zero and ErrOverflow if the exact
+// result is outside the int64 range. The exponent must be positive.
 //
-// The exact result is returned as uint64 when it fits. A negative base is
-// accepted only when the exponent is even; an odd exponent produces a
-// negative mathematical result, which cannot be represented as uint64 and
-// returns ErrOverflow. If exponent is not positive, Pow returns
-// ErrInvalidExponent.
-func Pow(base, exponent int64) (uint64, error) {
+// Negative bases are accepted for both even and odd exponents; an odd
+// exponent produces a negative result. If exponent is not positive, Pow
+// returns ErrInvalidExponent.
+func Pow(base, exponent int64) (int64, error) {
 	if exponent <= 0 {
 		return 0, ErrInvalidExponent
 	}
@@ -33,12 +33,10 @@ func Pow(base, exponent int64) (uint64, error) {
 		if exponent%2 == 0 {
 			return 1, nil
 		}
-		return 0, ErrOverflow
+		return -1, nil
 	}
 
-	if base < 0 && exponent%2 != 0 {
-		return 0, ErrOverflow
-	}
+	negative := base < 0 && exponent%2 != 0
 
 	var factor uint64
 	if base < 0 {
@@ -70,10 +68,23 @@ func Pow(base, exponent int64) (uint64, error) {
 		factor = lo
 	}
 
-	return result, nil
+	if negative {
+		if result > uint64(1)<<63 {
+			return 0, ErrOverflow
+		}
+		if result == uint64(1)<<63 {
+			return math.MinInt64, nil
+		}
+		return -int64(result), nil
+	}
+
+	if result > uint64(math.MaxInt64) {
+		return 0, ErrOverflow
+	}
+	return int64(result), nil
 }
 
 // Power is an alias for Pow.
-func Power(base, exponent int64) (uint64, error) {
+func Power(base, exponent int64) (int64, error) {
 	return Pow(base, exponent)
 }
